@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Area{% endblock %} - Printos</title>
+    <link rel="stylesheet" href="/static/style.css?v=4">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .sidebar-header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+            flex: 1;
+        }
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-subtle);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .nav-item a:hover {
+            background: var(--input-bg);
+            color: var(--primary);
+        }
+        .nav-item.active a {
+            color: var(--primary);
+            border-left-color: var(--primary);
+            background: var(--primary-faded);
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .topbar {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 1.5rem;
+            background: var(--bg-color);
+        }
+        .content-area {
+            padding: 2rem;
+        }
+        .badge {
+            background: var(--primary);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: auto;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><span class="accent">Printos</span> ERP</h1>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item {% if request.url.path == '/admin/dashboard' %}active{% endif %}">
+                    <a href="/admin/dashboard">
+                        Dashboard
+                        {% if unread_count > 0 %}<span class="badge">{{ unread_count }}</span>{% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if request.url.path == '/admin/accounting' %}active{% endif %}">
+                    <a href="/admin/accounting">Vyapar Ledger</a>
+                </li>
+                <li class="nav-item {% if request.url.path == '/admin/products' %}active{% endif %}">
+                    <a href="/admin/products">Store Products</a>
+                </li>
+                <li class="nav-item {% if request.url.path == '/admin/employees' %}active{% endif %}">
+                    <a href="/admin/employees">Employees</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/store" target="_blank">View Live Store -></a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <span>Welcome, <strong>{{ user.username }}</strong></span>
+                <button id="theme-toggle">🌙</button>
+                <a href="/logout" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a>
+            </header>
+            <div class="content-area">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script src="/static/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

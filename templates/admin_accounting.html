@@ -1,0 +1,98 @@
+{% extends "base_admin.html" %}
+{% block title %}Vyapar Ledger{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+        <h2 style="font-size: 2rem; color: var(--text-main); margin-bottom: 0.5rem;">Vyapar Ledger</h2>
+        <p>Record business transactions (Sales / Purchases) and manage Indian Accounting (GST).</p>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="glass-card">
+        <h3>Post New Journal Entry</h3>
+        <form action="/admin/accounting/add" method="post" style="margin-top: 1.5rem;">
+            <div class="input-group">
+                <label>Ledger Account</label>
+                <select name="t_type" required>
+                    <option value="income">Sundry Debtors (Income / Sales / Service)</option>
+                    <option value="expense">Sundry Creditors (Expense / Purchase / Rent)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Amount (₹)</label>
+                <input type="number" step="0.01" name="amount" required>
+            </div>
+            <div class="input-group">
+                <label>GST Applied</label>
+                <select name="gst_type">
+                    <option value="None">None (Exempt)</option>
+                    <option value="CGST">CGST (Central)</option>
+                    <option value="SGST">SGST (State)</option>
+                    <option value="IGST">IGST (Integrated)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>GST Amount (₹) - if applicable</label>
+                <input type="number" step="0.01" name="gst_amount" value="0">
+            </div>
+            <div class="input-group">
+                <label>Date of Transaction</label>
+                <input type="date" id="t_date" name="t_date" required>
+            </div>
+            <div class="input-group">
+                <label>Party Name / Particulars</label>
+                <input type="text" name="description" required placeholder="e.g. Sales to ABC Corp / Electricity Bill">
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Record Entry</button>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <h3>Daybook & Ledger Register</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Account Type</th>
+                        <th>Particulars</th>
+                        <th>Amount (Gross)</th>
+                        <th>Tax Component</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.date }}</td>
+                        <td style="color: {% if t.type == 'income' %}var(--primary){% else %}#d9534f{% endif %}; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">
+                            {{ t.type }}
+                        </td>
+                        <td>{{ t.description }}</td>
+                        <td style="font-weight: 700;">₹{{ "%.2f"|format(t.amount) }}</td>
+                        <td style="color: var(--text-subtle); font-size: 0.8rem;">
+                            {% if t.gst_type != 'None' and t.gst_type %}
+                                {{ t.gst_type }}: ₹{{ "%.2f"|format(t.gst_amount) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center;">No transactions recorded. Ledger is empty.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('t_date').valueAsDate = new Date();
+</script>
+{% endblock %}

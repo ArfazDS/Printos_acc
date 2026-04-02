@@ -1,0 +1,139 @@
+{% extends "base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+        <h2 style="font-size: 2rem; color: var(--text-main); margin-bottom: 0.5rem;">Business Overview</h2>
+    </div>
+</div>
+
+<div class="dashboard-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 2rem;">
+    <div class="glass-card" style="margin-bottom: 0;">
+        <h3>Total Income</h3>
+        <div class="total-value" style="color: var(--primary);">₹{{ "%.2f"|format(total_income) }}</div>
+    </div>
+    <div class="glass-card" style="margin-bottom: 0;">
+        <h3>Total Expense</h3>
+        <div class="total-value" style="color: #d9534f;">₹{{ "%.2f"|format(total_expense) }}</div>
+    </div>
+    <div class="glass-card" style="margin-bottom: 0;">
+        <h3>Net Profit</h3>
+        <div class="total-value" style="color: {% if profit >= 0 %}var(--primary){% else %}#d9534f{% endif %};">
+            ₹{{ "%.2f"|format(profit) }}
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- CHART SECTION -->
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1.5rem;">Income vs Expense History</h3>
+        <canvas id="plChart" width="400" height="200"></canvas>
+    </div>
+
+    <!-- NOTIFICATIONS SECTION -->
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1rem;">Recent Store Enquiries</h3>
+        {% if recent_enquiries %}
+        <ul style="list-style: none; padding: 0;">
+            {% for enq in recent_enquiries %}
+            <li style="padding: 1.5rem 0; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.8rem;">
+                <div>
+                    <strong style="color: var(--text-main); font-size: 1.05rem;">{{ enq.customer_name }}</strong> interested in
+                    <span style="color: var(--primary);">{{ enq.product.name }}</span><br>
+                    <span style="font-size: 0.85rem; color: var(--text-subtle);">📞 {{ enq.customer_phone }} | {{ enq.date.strftime('%Y-%m-%d') }}</span>
+                </div>
+                
+                <div>
+                    {% if enq.status == 'assigned' and enq.assignments %}
+                    <span class="badge" style="background:var(--surface-color); border:1px solid #5bc0de; color:#5bc0de; padding: 0.3rem 0.6rem; font-size: 0.8rem; display: inline-block;">
+                        Assigned to: <strong>{{ enq.assignments[0].employee.username }}</strong>
+                    </span>
+                    {% elif enq.status == 'resolved' %}
+                    <span class="badge" style="background:var(--surface-color); border:1px solid var(--primary); color:var(--primary); padding: 0.3rem 0.6rem; font-size: 0.8rem; display: inline-block;">
+                        Resolved
+                    </span>
+                    {% endif %}
+                </div>
+                
+                {% if enq.status != 'assigned' and enq.status != 'resolved' %}
+                <div style="background: rgba(148, 180, 71, 0.05); padding: 0.8rem; border-radius: 8px; border: 1px dashed var(--primary); display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span style="font-size: 0.8rem; color: var(--text-main);">⚠️ Unassigned Ticket</span>
+                    <form action="/admin/assign_task" method="post" style="display:flex; flex-direction: column; gap:0.5rem;">
+                        <input type="hidden" name="enquiry_id" value="{{ enq.id }}">
+                        <select name="employee_id" required style="padding:0.4rem; font-size:0.85rem; border-radius:4px; width:100%; box-sizing: border-box; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color);">
+                            <option value="">Select Employee...</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}">{{ emp.username }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn" type="submit" style="padding:0.4rem; font-size:0.85rem; width:100%;">Assign Task</button>
+                    </form>
+                    <form action="/admin/resolve_enquiry" method="post" style="display:flex; flex-direction: column;">
+                        <input type="hidden" name="enquiry_id" value="{{ enq.id }}">
+                        <button class="btn" type="submit" style="padding:0.4rem; font-size:0.85rem; width:100%; background: transparent; border: 1px solid var(--primary); color: var(--primary);">Mark Completed (Admin)</button>
+                    </form>
+                </div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No enquiries yet. Check your live store!</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Chart Data passed from FastAPI
+        var labels = {{ chart_labels | tojson
+    }};
+    var incomeData = {{ income_data | tojson }};
+    var expenseData = {{ expense_data | tojson }};
+
+    var ctx = document.getElementById('plChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: incomeData,
+                    backgroundColor: '#94b447', // Olive green
+                    borderColor: '#94b447',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Expense',
+                    data: expenseData,
+                    backgroundColor: '#d9534f', // Red
+                    borderColor: '#d9534f',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                },
+                x: {
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#f0f2eb' } }
+            }
+        }
+    });
+    });
+</script>
+{% endblock %}

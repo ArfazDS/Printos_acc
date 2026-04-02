@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Workspace - Printos</title>
+    <link rel="stylesheet" href="/static/style.css?v=6">
+    <style>
+        .work-layout {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            align-items: flex-start;
+        }
+        .main-col { flex: 2; }
+        .side-col { flex: 1; }
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: var(--surface-color);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .task-card {
+            background: var(--surface-color);
+            border: 1px solid var(--primary);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(148, 180, 71, 0.1);
+        }
+        .task-card h4 { margin-top: 0; color: var(--text-main); }
+        .task-status-Pending { color: #f0ad4e; font-weight: bold; }
+        .task-status-In\ Progress { color: #5bc0de; font-weight: bold; }
+        .task-status-Completed { color: var(--primary); font-weight: bold; }
+    </style>
+</head>
+<body style="padding: 0 2rem;">
+    <header style="padding: 1rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; margin-bottom: 2rem;">
+        <h1 style="font-size: 1.5rem;"><span class="accent">Printos</span> Workspace</h1>
+        <div class="header-controls">
+            <span>Welcome, <strong>{{ user.username }}</strong></span>
+            <button id="theme-toggle">🌙</button>
+            <a href="/logout" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a>
+        </div>
+    </header>
+
+    <!-- ACTIVE TASKS SECTION -->
+    {% set active_tasks = tasks | selectattr("status", "ne", "Completed") | list %}
+    {% set completed_tasks = tasks | selectattr("status", "eq", "Completed") | list %}
+
+    {% if active_tasks %}
+    <div style="max-width: 1200px; margin: 0 auto 2rem auto;">
+        <h2 style="color: #f0ad4e; margin-bottom: 1rem;">🔔 Active Assigned Enquiries</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for task in active_tasks %}
+            <div class="task-card">
+                <h4>{{ task.enquiry.customer_name }} ({{ task.enquiry.customer_phone }})</h4>
+                <p style="font-size: 0.9rem; color: var(--text-subtle); margin-bottom: 0.5rem;">
+                    <strong>Product:</strong> {{ task.enquiry.product.name }}<br>
+                    <strong>Date:</strong> {{ task.assigned_date.strftime('%Y-%m-%d %H:%M') }}<br>
+                    <strong>Status:</strong> <span class="task-status-{{ task.status | replace(' ', '.') }}">{{ task.status }}</span>
+                </p>
+                
+                <form action="/employee/update_task" method="post" style="margin-top: 1rem;">
+                    <input type="hidden" name="assignment_id" value="{{ task.id }}">
+                    <div style="margin-bottom: 0.5rem;">
+                        <textarea name="notes" rows="2" style="width:100%; border-radius:4px; box-sizing:border-box; padding:0.5rem; background:var(--input-bg); color:var(--text-main); border:1px solid var(--border-color);" placeholder="Enter CRM notes (e.g. called customer, proceeding to order)">{{ task.employee_notes or '' }}</textarea>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select name="status" style="flex:1; padding:0.5rem; border-radius:4px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--border-color);">
+                            <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                            <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                        <button class="btn" type="submit" style="padding: 0.5rem 1rem;">Update</button>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- COMPLETED TASKS SECTION -->
+    {% if completed_tasks %}
+    <div style="max-width: 1200px; margin: 0 auto 2rem auto;">
+        <h2 style="color: var(--primary); margin-bottom: 1rem;">✅ Completed Tasks</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for task in completed_tasks %}
+            <div class="task-card" style="opacity: 0.8; border-color: var(--primary);">
+                <h4>{{ task.enquiry.customer_name }} ({{ task.enquiry.customer_phone }})</h4>
+                <p style="font-size: 0.9rem; color: var(--text-subtle); margin-bottom: 0.5rem;">
+                    <strong>Product:</strong> {{ task.enquiry.product.name }}<br>
+                    <strong>Date:</strong> {{ task.assigned_date.strftime('%Y-%m-%d %H:%M') }}<br>
+                    <strong>Status:</strong> <span class="task-status-Completed">Completed</span>
+                </p>
+                <div style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.1); border-radius: 4px;">
+                    <strong style="font-size: 0.85rem;">Notes:</strong><br>
+                    <span style="font-size: 0.85rem; color: var(--text-subtle);">{{ task.employee_notes or 'No notes provided.' }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="work-layout">
+        <div class="main-col">
+            <h2 style="margin-bottom: 1rem;">Record Daily Work</h2>
+            
+            <form action="/employee" method="get" class="filter-bar">
+                <div class="input-group" style="flex: 1; margin: 0;">
+                    <label for="filter_date">Filter by Date</label>
+                    <input type="date" id="filter_date" name="filter_date" value="{{ filter_date if filter_date else '' }}">
+                </div>
+                <button type="submit" class="btn">Filter</button>
+                <a href="/employee" class="btn btn-secondary">Clear</a>
+            </form>
+
+            <div class="glass-card" style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Work Description</th>
+                            <th>Value / Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Changed from work_entries to entries due to main.py update -->
+                        {% for entry in entries %}
+                        <tr>
+                            <td>{{ entry.date }}</td>
+                            <td>{{ entry.description }}</td>
+                            <td>₹{{ "%.2f"|format(entry.value) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center;">No work entries found for this period.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="side-col">
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <h2>Log Task</h2>
+                <form action="/employee/add_work" method="post" style="margin-top: 1rem;">
+                    <div class="input-group">
+                        <label for="work_date">Date</label>
+                        <input type="date" id="work_date" name="work_date" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="description">Description of Work</label>
+                        <input type="text" id="description" name="description" placeholder="e.g. Printed banners / Converted CRM ticket" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="value">Amount / Value (₹)</label>
+                        <input type="number" id="value" name="value" step="0.01" min="0" required>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Submit Work</button>
+                </form>
+            </div>
+
+            <div class="glass-card">
+                <h2>Personal Summary</h2>
+                <p>Total Filtered Earnings</p>
+                <div class="total-value">₹{{ "%.2f"|format(total_val) }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/app.js"></script>
+    <script>
+        document.getElementById('work_date').valueAsDate = new Date();
+    </script>
+</body>
+</html>

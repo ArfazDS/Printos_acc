@@ -1,0 +1,124 @@
+{% extends "base_admin.html" %}
+{% block title %}Manage Employees & Tasks{% endblock %}
+
+{% block content %}
+<style>
+    .task-status-Pending { color: #f0ad4e; font-weight: bold; }
+    .task-status-In.Progress { color: #5bc0de; font-weight: bold; }
+    .task-status-Completed { color: var(--primary); font-weight: bold; }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+        <h2 style="font-size: 2rem; color: var(--text-main); margin-bottom: 0.5rem;">Employee & Task CRM</h2>
+        <p>Monitor assigned CRM tasks and track daily manual reports from employees.</p>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="glass-card">
+        <h3>Create Employee Account</h3>
+        <form action="/admin/create_employee" method="post" style="margin-top: 1.5rem;">
+            <div class="input-group">
+                <label for="new_username">Username</label>
+                <input type="text" id="new_username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="new_password">Password</label>
+                <input type="password" id="new_password" name="password" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Create Profile</button>
+        </form>
+    </div>
+
+    <!-- MAIN TRACKING WIDGET -->
+    <div class="glass-card">
+        <h3>Filter Records & Tasks</h3>
+        <form action="/admin/employees" method="get" class="filter-bar" style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: flex-end;">
+             <div class="input-group" style="flex: 1; margin: 0;">
+                <label for="employee_id">Select Employee</label>
+                <select name="employee_id" id="employee_id">
+                    <option value="">All Employees</option>
+                    {% for emp in employees %}
+                    <option value="{{ emp.id }}" {% if selected_emp_id|string == emp.id|string %}selected{% endif %}>{{ emp.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn" style="padding: 0.8rem 1.5rem;">Filter</button>
+            <a href="/admin/employees" class="btn btn-secondary" style="padding: 0.8rem 1.5rem;">Clear</a>
+        </form>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 2rem 0;">
+
+        <!-- ASSIGNED TASKS CRM TABLE -->
+        <h3 style="color: var(--primary);">Assigned CRM Tasks (Store Enquiries)</h3>
+        <div style="overflow-x: auto; margin-bottom: 2rem;">
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Date Assigned</th>
+                        <th>Employee</th>
+                        <th>Customer & Product</th>
+                        <th>Status & Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in assigned_tasks %}
+                    <tr>
+                        <td>{{ task.assigned_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td style="color: var(--primary);">{{ task.employee.username }}</td>
+                        <td>
+                            <strong>{{ task.enquiry.customer_name }}</strong> ({{ task.enquiry.customer_phone }})<br>
+                            <span style="font-size: 0.85rem; color: var(--text-subtle);">{{ task.enquiry.product.name }}</span>
+                        </td>
+                        <td>
+                            <span class="task-status-{{ task.status | replace(' ', '.') }}">{{ task.status }}</span><br>
+                            <span style="font-size: 0.85rem; font-style: italic; color: var(--text-subtle);">
+                                {% if task.employee_notes %}
+                                "{{ task.employee_notes }}"
+                                {% else %}
+                                No notes submitted yet.
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-subtle);">No tasks found for this filter.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MANUAL WORK ENTRIES TABLE -->
+        <h3>Manual Work Logs</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Date Work Performed</th>
+                        <th>Employee</th>
+                        <th>Description</th>
+                        <th>Value Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in work_entries %}
+                    <tr>
+                        <td>{{ entry.date }}</td>
+                        <td style="color: var(--primary);">{{ entry.employee.username }}</td>
+                        <td>{{ entry.description }}</td>
+                        <td>₹{{ "%.2f"|format(entry.value) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-subtle);">No manual work logs found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

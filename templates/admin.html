@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Printos Accounting</title>
+    <link rel="stylesheet" href="/static/style.css?v=3">
+</head>
+<body>
+    <header>
+        <h1><span class="accent">Admin</span> Dashboard</h1>
+        <div class="header-controls">
+            <span>Welcome, {{ user.username }}</span>
+            <button id="theme-toggle">🌙</button>
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+        </div>
+    </header>
+    
+    <div class="container dashboard-grid">
+        <!-- Sidebar Options -->
+        <div>
+            <div class="glass-card">
+                <h2>Create Employee</h2>
+                <form action="/admin/create_employee" method="post" style="margin-top: 1rem;">
+                    <div class="input-group">
+                        <label for="new_username">Username</label>
+                        <input type="text" id="new_username" name="username" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="new_password">Password</label>
+                        <input type="password" id="new_password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Create Profile</button>
+                </form>
+            </div>
+            
+            <div class="glass-card">
+                <h2>Summary</h2>
+                <p>Total Filtered Value</p>
+                <div class="total-value">${{ "%.2f"|format(total_val) }}</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div>
+            <div class="glass-card">
+                <h2>Business Accounts Overview</h2>
+                <p>Track employee work and calculate daily progress.</p>
+                
+                <form action="/admin" method="get" class="filter-bar" style="margin-top: 2rem;">
+                    <div class="input-group" style="flex: 1; margin: 0;">
+                        <label for="employee_id">Select Employee</label>
+                        <select name="employee_id" id="employee_id">
+                            <option value="">All Employees</option>
+                            {% for emp in employees %}
+                            <option value="{{ emp.id }}" {% if selected_emp_id == emp.id %}selected{% endif %}>{{ emp.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1; margin: 0;">
+                        <label for="from_date">From Date</label>
+                        <input type="date" id="from_date" name="from_date" value="{{ from_date or '' }}">
+                    </div>
+                    <div class="input-group" style="flex: 1; margin: 0;">
+                        <label for="to_date">To Date</label>
+                        <input type="date" id="to_date" name="to_date" value="{{ to_date or '' }}">
+                    </div>
+                    <button type="submit" class="btn">Filter</button>
+                    <a href="/admin" class="btn btn-secondary">Clear</a>
+                </form>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employee</th>
+                                <th>Description</th>
+                                <th>Value / Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in work_entries %}
+                            <tr>
+                                <td>{{ entry.date }}</td>
+                                <td>{{ entry.employee.username }}</td>
+                                <td>{{ entry.description }}</td>
+                                <td>${{ "%.2f"|format(entry.value) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center;">No work entries found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

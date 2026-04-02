@@ -1,0 +1,62 @@
+{% extends "base_admin.html" %}
+{% block title %}Manage Products{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+    <div>
+        <h2 style="font-size: 2rem; color: var(--text-main); margin-bottom: 0.5rem;">Store Catalog</h2>
+        <p>Add products to your public storefront to receive customer enquiries.</p>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="glass-card">
+        <h3>Add New Product</h3>
+        <form action="/admin/products/add" method="post" style="margin-top: 1.5rem;">
+            <div class="input-group">
+                <label>Product Name</label>
+                <input type="text" name="name" required placeholder="e.g. Custom Flex Banner">
+            </div>
+            <div class="input-group">
+                <label>Price ($) - Optional</label>
+                <input type="number" step="0.01" name="price" value="0">
+            </div>
+            <div class="input-group">
+                <label>Description</label>
+                <input type="text" name="description" placeholder="Short description of service/product">
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Publish to Store</button>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <h3>Active Products</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td>#{{ p.id }}</td>
+                        <td style="font-weight: 700;">{{ p.name }}</td>
+                        <td>₹{{ "%.2f"|format(p.price) }}</td>
+                        <td style="color: var(--text-subtle);">{{ p.description }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No products active. Add one to open the store!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
