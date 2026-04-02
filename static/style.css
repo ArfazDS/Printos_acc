@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
+:root {
+  /* Black & Olive Green Theme - Default Dark */
+  --bg-color: #0b0c0a;
+  --surface-color: #161814;
+  --text-main: #f0f2eb;
+  --text-subtle: #8a9182;
+  --primary: #94b447; /* Bright Olive Green */
+  --primary-hover: #b1d655;
+  --primary-faded: rgba(148, 180, 71, 0.15);
+  --border-color: #2c3028;
+  --input-bg: #0b0c0a;
+  --shadow-glow: 0 0 20px rgba(148, 180, 71, 0.1);
+}
+
+[data-theme="light"] {
+  /* High contrast light version of the theme */
+  --bg-color: #f4f5f2;
+  --surface-color: #ffffff;
+  --text-main: #1a1c17;
+  --text-subtle: #5b6154;
+  --primary: #6c8c29; /* Darker Olive */
+  --primary-hover: #506a1c;
+  --primary-faded: rgba(108, 140, 41, 0.15);
+  --border-color: #d1d6c8;
+  --input-bg: #f9faf7;
+  --shadow-glow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography Details */
+h1, h2, h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+p {
+  color: var(--text-subtle);
+  line-height: 1.6;
+}
+
+/* Base Layout & Cards */
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  width: 100%;
+}
+
+.glass-card {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Geometric accent line on cards */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.glass-card:hover::before {
+  opacity: 1;
+}
+
+.glass-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* Forms & Inputs */
+.input-group {
+  margin-bottom: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-subtle);
+}
+
+input[type="text"], input[type="password"], input[type="date"], input[type="number"], select {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-main);
+  outline: none;
+  font-size: 1rem;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-faded);
+}
+
+/* Buttons - Brutalist Olive Theme */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  border: 2px solid var(--primary);
+  background: var(--primary);
+  color: #0b0c0a; /* High contrast text on primary buttons */
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-main);
+  border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+/* Header Navbar */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2.5rem;
+  background: var(--surface-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+  font-size: 1.5rem;
+  color: var(--text-main);
+}
+header h1 span.accent {
+  color: var(--primary);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  font-weight: 600;
+}
+
+/* Theme Toggle Button */
+#theme-toggle {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#theme-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Grid Layouts for Dashboards */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  padding: 1.5rem;
+  background: var(--input-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+/* Clean Tech Tables */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.5rem;
+}
+
+th, td {
+  padding: 1.2rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-subtle);
+  background-color: var(--input-bg);
+}
+
+th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+td {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+tr:hover td {
+  background-color: var(--primary-faded);
+  color: var(--primary);
+}
+
+/* Login specific */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 86px);
+}
+.login-wrapper .glass-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 4rem 3rem;
+}
+.login-header {
+  margin-bottom: 3rem;
+}
+.login-header h2 {
+  font-size: 2rem;
+  color: var(--primary);
+}
+.total-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 1rem;
+  text-shadow: var(--shadow-glow);
+}
